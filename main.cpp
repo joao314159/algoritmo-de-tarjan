@@ -170,6 +170,8 @@ Graph2 ler_arquivo1(string nome){
 //tempo inicia em zero
 void busca_em_profundidade_marcando_vertices2(Graph2& graph, Node node, int& tempo,bool raiz,vector<int>& vertices_de_corte){
 
+  //para tratar o caso particular da raiz como vértice de corte
+  int filhos_da_raiz = 0;
 
   if(raiz){
     graph.nodes[node.valor].visitado = true;
@@ -187,6 +189,11 @@ void busca_em_profundidade_marcando_vertices2(Graph2& graph, Node node, int& tem
 
   for(int i = 0; i<graph.vizinhos[node.valor].size(); i++){
     //cout<<"vizinho de "<<node.valor<<" : "<<graph.vizinhos[node.valor][i].valor<<" "<<endl;
+
+    if(raiz){
+      filhos_da_raiz++:
+    }
+
 
     //#define vizinho_do_node graph.nodes[graph.vizinhos[node.valor][i]]
 
@@ -218,6 +225,13 @@ void busca_em_profundidade_marcando_vertices2(Graph2& graph, Node node, int& tem
         graph.nodes[node.valor].menor_tempo = min(vizinho_do_node.tempo,graph.nodes[node.valor].menor_tempo );
       }
     }
+
+    //se a raiz é vértice de corte
+    if(raiz && filhos_da_raiz >=2){
+      vertices_de_corte.push_back(node.valor);
+      graph.conexo = 1;
+    }
+
   }
 
 }
