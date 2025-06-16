@@ -311,20 +311,22 @@ Graph2 busca_em_profundidade_marcando_vertices(Graph2 graph, Node node,vector<in
     return graph2;
 
 }
-/*
+
 //testa se o grafo é 3-conexo
-Graph2 busca_em_profundidade_marcando_vertices3(Graph2 graph, vector<vector<int>>& vertices_de_corte){
+int busca_em_profundidade_marcando_vertices3(Graph2 graph, vector<vector<int>>& vertices_de_corte){
+
+
 
   //para cada remoção de vértice executar o outro código
   vector<Graph2> grafos = Gerar_grafos(graph);
+  vector<int> vertices_de_corte2 = {};
+  vector<int> par;
+
 
   for(int i = 0; i< grafos.size(); i++){
 
-    vector<int> vertices_de_corte2 = {};
 
-    Graph2 grafos2 = busca_em_profundidade_marcando_vertices(grafos[i], grafos[i].nodes[0],vertices_de_corte2)
-
-    vector<int> par;
+    Graph2 grafos2 = busca_em_profundidade_marcando_vertices(grafos[i], grafos[i].nodes[0],vertices_de_corte2);
 
     for(int i2 = 0; i2< vertices_de_corte2.size(); i2++){
 
@@ -333,14 +335,20 @@ Graph2 busca_em_profundidade_marcando_vertices3(Graph2 graph, vector<vector<int>
 
 
     }
-
-
   }
 
 
+  //se não há nenhum par de vértices de corte então o grafo é 3-conexo
+  if(par.size() == 0){
+    return 3;
+  }
+  else{
+    return 2;
+  }
+
 
 }
-*/
+
 void k_conexo(Graph2 graph){
   //printa se o grafo é 0-conexo, 1-conexo, 2-conexo ou mais
   //algoritmo de tarjan
@@ -380,7 +388,16 @@ void k_conexo(Graph2 graph){
   }
   else{
     cout<<"Grafo 2-conexo"<<endl;
+
+    vector<vector<int>> vertices_de_corte = {};
+
+    int a = busca_em_profundidade_marcando_vertices3(grafo2, vertices_de_corte);
+    if(a == 3){
+      cout<<"Grafo é 3-conexo!"<<endl;
+    }
   }
+
+
 
   //ao fazer a DFS será necessário salvar:
   //o tempo de chegada no vértice (atributo tempo)
@@ -398,7 +415,10 @@ int main(){
     string number = to_string(i+1);
     string texto = "entradas/" + number + ".in";
     cout<<texto<<endl;
-    arquivos.push_back(texto);
+
+    if((i+1) != 9){
+      arquivos.push_back(texto);
+    }
   }
 
 
