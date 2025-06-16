@@ -1,11 +1,10 @@
 
 
-
-
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <cctype>
+#include <string>
 
 #define vizinho_do_node graph.nodes[graph.vizinhos[node.valor][i]]
 
@@ -26,12 +25,14 @@ public:
   Node(){
     this->visitado = false;
     this->pai = -1;
+
   }
 
   Node(int valor){
     this->visitado = false;
     this->valor = valor;
     this->pai = -1;
+
   }
 
   int valor;
@@ -41,6 +42,7 @@ public:
   int pai;
   int tempo;
   int menor_tempo;
+
 
   void print(){
     cout<<"vértice "<<this->valor<<endl;
@@ -72,6 +74,8 @@ Graph2(){
   this->vizinhos = {};
   this->conexo = -1;
 
+  this->vertice_de_corte  = -1;
+
 }
 Graph2(int maximo_vertices){
   //garantimos poder alocar corretamente todos os possíveis nodes do grafo, inicializando o vector com maximo_vertices
@@ -80,6 +84,9 @@ Graph2(int maximo_vertices){
   this->vizinhos = vector<vector<int>>(maximo_vertices);
 
   this->conexo = -1;
+
+  this->vertice_de_corte = -1;
+
 }
 
 //aqui acessamos facilmente todos os vizinhos de cada node
@@ -94,6 +101,41 @@ vector<Node> nodes;
 //para definir se é conexo. 0 = desconexo 1 = 1-conexo 2 = 2-conexo 3 = 3-conexo ou mais
 int conexo;
 
+//variável específica para usar no teste de grafo 3-convexo
+int vertice_de_corte;
+
+
+void remover_vertice(int node){
+  this->vertice_de_corte = node;
+
+  vector<vector<int>> vizinhos2 = {};
+
+  for(int i = 0; i< this->vizinhos.size(); i++){
+    vector<int> lista = {};
+    if(i != node){
+      for(int i2 = 0; i2 < this->vizinhos[i].size(); i2++){
+        if(this->vizinhos[i][i2] != node){
+          lista.push_back(this->vizinhos[i][i2]);
+        }
+      }
+      vizinhos2.push_back(lista);
+    }
+  }
+
+  this->vizinhos = vizinhos2;
+
+  for(int i = 0; i< this->vizinhos.size(); i++){
+    for(int i2 = 0; i2 < this->vizinhos[i].size(); i2++){
+      if(this->vizinhos[i][i2] > node){
+        this->vizinhos[i][i2]--;
+      }
+    }
+  }
+
+  this->nodes.erase(this->nodes.begin() + node);
+
+}
+
 //a saída são os vizinhos de cada vértices
 void print(){
   for(int i = 0; i < vizinhos.size(); i++){
@@ -107,6 +149,22 @@ void print(){
 
 
 };
+
+
+
+//gera grafos com um vértice a menos
+vector<Graph2> Gerar_grafos(Graph2 graph){
+
+  vector<Graph2> grafos;
+
+  for(int i = 0; i< graph.quantidade_vertices; i++){
+    Graph2 graph2 = graph;
+    graph2.remover_vertice(i);
+    grafos.push_back(graph2);
+
+  }
+  return grafos;
+}
 
 
 //lê o arquivo e salva o resultado em um objeto da classe grafo
@@ -191,7 +249,7 @@ void busca_em_profundidade_marcando_vertices2(Graph2& graph, Node node, int& tem
     //cout<<"vizinho de "<<node.valor<<" : "<<graph.vizinhos[node.valor][i].valor<<" "<<endl;
 
     if(raiz){
-      filhos_da_raiz++:
+      filhos_da_raiz++;
     }
 
 
@@ -225,13 +283,13 @@ void busca_em_profundidade_marcando_vertices2(Graph2& graph, Node node, int& tem
         graph.nodes[node.valor].menor_tempo = min(vizinho_do_node.tempo,graph.nodes[node.valor].menor_tempo );
       }
     }
-
+/*
     //se a raiz é vértice de corte
     if(raiz && filhos_da_raiz >=2){
       vertices_de_corte.push_back(node.valor);
       graph.conexo = 1;
     }
-
+*/
   }
 
 }
@@ -253,19 +311,53 @@ Graph2 busca_em_profundidade_marcando_vertices(Graph2 graph, Node node,vector<in
     return graph2;
 
 }
+/*
+//testa se o grafo é 3-conexo
+Graph2 busca_em_profundidade_marcando_vertices3(Graph2 graph, vector<vector<int>>& vertices_de_corte){
 
+  //para cada remoção de vértice executar o outro código
+  vector<Graph2> grafos = Gerar_grafos(graph);
+
+  for(int i = 0; i< grafos.size(); i++){
+
+    vector<int> vertices_de_corte2 = {};
+
+    Graph2 grafos2 = busca_em_profundidade_marcando_vertices(grafos[i], grafos[i].nodes[0],vertices_de_corte2)
+
+    vector<int> par;
+
+    for(int i2 = 0; i2< vertices_de_corte2.size(); i2++){
+
+      par.push_back(grafos[i].vertice_de_corte);
+      par.push_back(vertices_de_corte2[i2]);
+
+
+    }
+
+
+  }
+
+
+
+}
+*/
 void k_conexo(Graph2 graph){
   //printa se o grafo é 0-conexo, 1-conexo, 2-conexo ou mais
   //algoritmo de tarjan
 
   //grafo 2-conexo se tirar qualquer 1 vértice, o grafo continua conexo
 
-  //se no final essa lista não estiver vazia então o grafo é 2-conexo
+  //se no final essa lista estiver vazia então o grafo é 2-conexo
   vector<int> vertices_de_corte = {};
+
+  //se no final essa lista estiver vazia então o grafo é 3-conexo
+  //vector<vector<int>> vertices_de_corte2 = {};
 
   //grafo modificado
   Graph2 grafo2 = busca_em_profundidade_marcando_vertices(graph, graph.nodes[0], vertices_de_corte);
 
+  //para testar se é 3-conexo
+  //Graph2 grafo3 = busca_em_profundidade_marcando_vertices3(graph,vertices_de_corte2);
 
   if(grafo2.conexo == 0){
     cout<<"Grafo desconexo"<<endl;
@@ -290,7 +382,6 @@ void k_conexo(Graph2 graph){
     cout<<"Grafo 2-conexo"<<endl;
   }
 
-
   //ao fazer a DFS será necessário salvar:
   //o tempo de chegada no vértice (atributo tempo)
   //o menor tempo de chegada alcançado pelo filho de cada vértice (atributo menor_tempo)
@@ -301,10 +392,23 @@ void k_conexo(Graph2 graph){
 
 int main(){
 
+  vector<string> arquivos = {};
 
-  Graph2 graph = ler_arquivo1("entradas/3.in");
+  for(int i = 0; i < 14; i++){
+    string number = to_string(i+1);
+    string texto = "entradas/" + number + ".in";
+    cout<<texto<<endl;
+    arquivos.push_back(texto);
+  }
 
+
+  for(int i = 0; i< 15; i++){
+
+  Graph2 graph = ler_arquivo1(arquivos[i]);
+  cout<<"arquivo: "<<arquivos[i]<<endl;
   k_conexo(graph);
+
+  }
 
   return 0;
 
