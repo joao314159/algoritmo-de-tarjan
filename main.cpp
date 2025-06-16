@@ -108,12 +108,15 @@ int vertice_de_corte;
 void remover_vertice(int node){
   this->vertice_de_corte = node;
 
+  //crio um vector para gerar uma lista de vizinhos igual a anterior, mas sem o vértice removido
   vector<vector<int>> vizinhos2 = {};
 
   for(int i = 0; i< this->vizinhos.size(); i++){
     vector<int> lista = {};
+    //insiro os elementos da lista, exceto o node removido.
     if(i != node){
       for(int i2 = 0; i2 < this->vizinhos[i].size(); i2++){
+        //insiro os vizinhos do elemento, exceto o node removido
         if(this->vizinhos[i][i2] != node){
           lista.push_back(this->vizinhos[i][i2]);
         }
@@ -124,6 +127,7 @@ void remover_vertice(int node){
 
   this->vizinhos = vizinhos2;
 
+  //ajusto os nodes para que façam sentido após a remoção do node.
   for(int i = 0; i< this->vizinhos.size(); i++){
     for(int i2 = 0; i2 < this->vizinhos[i].size(); i2++){
       if(this->vizinhos[i][i2] > node){
@@ -322,30 +326,67 @@ int busca_em_profundidade_marcando_vertices3(Graph2 graph, vector<vector<int>>& 
   vector<int> vertices_de_corte2 = {};
   vector<int> par;
 
+  vector<vector<int>> pares;
 
+  /*
+  for(int i = 0; i< grafos[0].vizinhos.size(); i++){
+    for(int i2 = 0; i2< grafos[0].vizinhos[i].size(); i2++){
+      if(grafos[0].vizinhos[i][i2] != grafos[1].vizinhos[i][i2]){
+        cout<<"TESTE"<<endl;
+      }
+    }
+  }
+  */
+
+  /*
   for(int i = 0; i< grafos.size(); i++){
 
-
+    //roda o trajan para um grafo com um vértice a menos
     Graph2 grafos2 = busca_em_profundidade_marcando_vertices(grafos[i], grafos[i].nodes[0],vertices_de_corte2);
+
+
+
 
     for(int i2 = 0; i2< vertices_de_corte2.size(); i2++){
 
       par.push_back(grafos[i].vertice_de_corte);
       par.push_back(vertices_de_corte2[i2]);
 
+      pares.push_back(par);
+      par.clear();
 
     }
   }
+  */
+
+  //TENTATIVA2
+  vector<Graph2> grafos2;
+
+  for(int i = 0; i< grafos.size(); i++){
+    vector<Graph2> lista =  Gerar_grafos(grafos[i]);
+
+    for(int i2 = 0; i2< lista.size();i2++){
+      grafos2.push_back(lista[i2]);
+    }
+  }
+
+  for(int i =0; i< grafos2.size();i++){
+    //para cada par de vértices testar se o grafo pode ser percorrido
+    Graph2 grafos02 = busca_em_profundidade_marcando_vertices(grafos2[i], grafos2[i].nodes[0],vertices_de_corte2);
+    if(grafos02.conexo == 0){
+      return 2;
+    }
+  }
+  return 3;
 
 
   //se não há nenhum par de vértices de corte então o grafo é 3-conexo
-  if(par.size() == 0){
+  if(pares.size() == 0){
     return 3;
   }
   else{
     return 2;
   }
-
 
 }
 
@@ -395,6 +436,14 @@ void k_conexo(Graph2 graph){
     if(a == 3){
       cout<<"Grafo é 3-conexo!"<<endl;
     }
+    else{
+      for(int i = 0; i < vertices_de_corte.size();i++){
+        cout<<vertices_de_corte[i][0]<<endl;
+        cout<<vertices_de_corte[i][1]<<endl;
+        cout<<endl;
+      }
+    }
+
   }
 
 
@@ -424,9 +473,9 @@ int main(){
 
   for(int i = 0; i< 15; i++){
 
-  Graph2 graph = ler_arquivo1(arquivos[i]);
-  cout<<"arquivo: "<<arquivos[i]<<endl;
-  k_conexo(graph);
+    Graph2 graph = ler_arquivo1(arquivos[i]);
+    cout<<"arquivo: "<<arquivos[i]<<endl;
+    k_conexo(graph);
 
   }
 
